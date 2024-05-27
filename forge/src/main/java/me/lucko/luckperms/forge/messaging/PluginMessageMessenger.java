@@ -49,7 +49,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class PluginMessageMessenger extends AbstractPluginMessageMessenger implements Messenger {
-    private static final ResourceLocation CHANNEL = new ResourceLocation(AbstractPluginMessageMessenger.CHANNEL);
+    private static final ResourceLocation CHANNEL_ID = new ResourceLocation(AbstractPluginMessageMessenger.CHANNEL);
+    private static final EventNetworkChannel CHANNEL = NetworkRegistry.newEventChannel(CHANNEL_ID, () -> "1", predicate -> true, predicate -> true);
 
     private final LPForgePlugin plugin;
     private EventNetworkChannel channel;
@@ -60,14 +61,18 @@ public class PluginMessageMessenger extends AbstractPluginMessageMessenger imple
     }
 
     public void init() {
-        this.channel = NetworkRegistry.newEventChannel(CHANNEL, () -> "1", predicate -> true, predicate -> true);
-        this.channel.addListener(event -> {
+        CHANNEL.addListener(event -> {
             byte[] buf = new byte[event.getPayload().readableBytes()];
             event.getPayload().readBytes(buf);
 
             handleIncomingMessage(buf);
             event.getSource().get().setPacketHandled(true);
         });
+    }
+
+    public static void registerChannel() {
+        // do nothing - the channels are registered in the static initializer, we just
+        // need to make sure that is called (which it will be if this method runs)
     }
 
     @Override
@@ -86,7 +91,7 @@ public class PluginMessageMessenger extends AbstractPluginMessageMessenger imple
 
             FriendlyByteBuf byteBuf = new FriendlyByteBuf(Unpooled.buffer());
             byteBuf.writeBytes(buf);
-            Packet<?> packet = new ClientboundCustomPayloadPacket(CHANNEL, byteBuf);
+            Packet<?> packet = new ClientboundCustomPayloadPacket(CHANNEL_ID, byteBuf);
 
             player.connection.send(packet);
 

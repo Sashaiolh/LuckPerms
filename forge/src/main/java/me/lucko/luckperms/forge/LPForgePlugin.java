@@ -50,6 +50,7 @@ import me.lucko.luckperms.forge.listeners.ForgeConnectionListener;
 import me.lucko.luckperms.forge.listeners.ForgePlatformListener;
 import me.lucko.luckperms.forge.messaging.ForgeMessagingFactory;
 import me.lucko.luckperms.forge.service.ForgePermissionHandlerListener;
+import me.lucko.luckperms.forge.messaging.PluginMessageMessenger;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
@@ -101,6 +102,8 @@ public class LPForgePlugin extends AbstractLuckPermsPlugin {
 
         this.commandManager = new ForgeCommandExecutor(this);
         this.bootstrap.registerListeners(this.commandManager);
+
+        PluginMessageMessenger.registerChannel();
     }
 
     @Override
